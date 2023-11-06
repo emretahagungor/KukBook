@@ -7,6 +7,9 @@ import ItemDetailScreen from './src/screens/ItemDetailScreen'
 import MealsScreen from './src/screens/MealsScreen'
 import 'react-native-gesture-handler';
 import {createDrawerNavigator} from '@react-navigation/drawer'
+import EmptyListScreen from './src/screens/EmptyListScreen'
+
+
 
 export default function App() {
 
@@ -29,7 +32,7 @@ export default function App() {
         <Stack.Screen name='Home' component={HomeScreen} />
         <Stack.Screen name='Meals' component={MealsScreen} />
         <Stack.Screen name='Detail' component={ItemDetailScreen} />
-
+        <Stack.Screen name='Empty' component={EmptyListScreen}/> 
       </Stack.Navigator>
     </NavigationContainer>
   );

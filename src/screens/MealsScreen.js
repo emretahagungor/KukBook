@@ -1,5 +1,5 @@
 import { Text, FlatList, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MealsCard from "../components/mealsCard";
 import useFetch from "../hooks/useFetch";
@@ -8,29 +8,42 @@ import axios from "axios";
 
 const MealsScreen = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { category } = route.params;
   const { words } = route.params;
   const { data, error, loading } = useFetch(
     `filter.php?c=${category}`,
     "meals"
   );
-  const datata = "http://www.themealdb.com/api/json/v1/1/search.php?f=";
+
+  const [wordData, setWordData] = useState([])
+  
+  const datata = "https://www.themealdb.com/api/json/v1/1/search.php?f=";
+  const fetchData = useCallback(async () => {
+    try {
+      const response = await axios.get(`${datata}${words}`);
+      if (response.data.meals === null) {
+        navigation.navigate('Empty');
+      } else {
+        setWordData(response.data.meals);
+      }
+    } catch (err) {
+      console.error(err);
+      navigation.navigate('Fail');
+    }
+  }, [datata, navigation, words]);
+
   useEffect(() => {
-    axios
-      .get(`${datata}${words}`)
-      .then((res) => console.warn(res.data))
-      .catch((err) => console.error(err));
-  }, []);
-
-  console.error(`${datata}${words}`)
-
-  const navigation = useNavigation();
-
+    fetchData();
+  }, [fetchData]);
+  
   const handleMealPress = (idMeal) => {
-    return navigation.navigate("Detail", { id:idMeal });
+    console.warn(idMeal)
+    
   };
 
   const renderMealItem = ({ item }) => {
+    
     return (
       <TouchableOpacity onPress={() => handleMealPress(item.idMeal)}>
         <MealsCard
@@ -51,7 +64,7 @@ const MealsScreen = () => {
           paddingVertical: 12,
         }}
       >
-        <Text style={{ fontSize: 22, fontWeight: "bold" }}>{category}</Text>
+       {category ?  <Text style={{ fontSize: 22, fontWeight: "bold" }}>{category}</Text> : <Text style={{ fontSize: 22, fontWeight: "bold" }}>OOOOOO</Text>}
       </View>
       {loading ? (
         <Text>Loading...</Text>
@@ -59,7 +72,7 @@ const MealsScreen = () => {
         <Text>Error: {error}</Text>
       ) : (
         <FlatList
-          data={data}
+          data={category ? data : wordData }
           renderItem={renderMealItem}
           keyExtractor={(item) => item.idMeal}
         />
